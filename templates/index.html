@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">🎓</div>
+            <div>
+                <h2>STUDENT</h2>
+                <p>ANALYTICS</p>
+            </div>
+        </div>
+
+        <p class="nav-label">MENU</p>
+        <button class="nav-link active" data-page="dashboard">▦ &nbsp; Dashboard</button>
+        <button class="nav-link" data-page="report">♙ &nbsp; Student Report</button>
+        <button class="nav-link" data-page="subjects">▥ &nbsp; Subject Analysis</button>
+        <button class="nav-link" data-page="students">☷ &nbsp; All Students</button>
+
+        <div class="sidebar-bottom">
+            <p>STUDENT PERFORMANCE</p>
+            <small>Academic Analytics System</small>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">ACADEMIC MANAGEMENT</p>
+                <h1 id="pageTitle">Student Performance Dashboard</h1>
+                <p class="muted">Academic Year 2026–2027</p>
+            </div>
+            <button class="refresh-btn" id="refreshBtn">↻ Refresh Data</button>
+        </header>
+
+        <div id="errorBox" class="alert hidden"></div>
+        <div id="loading" class="loading">Loading student data...</div>
+
+        <section id="dashboardPage" class="page hidden">
+            <div class="metrics">
+                <article class="metric-card">
+                    <div class="metric-top"><span>Total Students</span><span class="metric-icon">♙</span></div>
+                    <h2 id="totalStudents">—</h2>
+                    <p>Valid student records</p>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-top"><span>Class Average</span><span class="metric-icon">◷</span></div>
+                    <h2 id="classAverage">—</h2>
+                    <p>Average out of 100</p>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-top"><span>Pass Rate</span><span class="metric-icon">✓</span></div>
+                    <h2 id="passRate">—</h2>
+                    <p id="passCount">— students passed</p>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-top"><span>Class Topper</span><span class="metric-icon gold">★</span></div>
+                    <h2 class="topper-name" id="topperName">—</h2>
+                    <p id="topperTotal">—</p>
+                </article>
+            </div>
+
+            <div class="chart-grid">
+                <article class="panel">
+                    <div class="panel-heading">
+                        <div><h3>Student Total Marks</h3><p>Marks scored by each student</p></div>
+                    </div>
+                    <div class="chart-container"><canvas id="marksChart"></canvas></div>
+                </article>
+                <article class="panel">
+                    <div class="panel-heading">
+                        <div><h3>Pass vs Fail</h3><p>Class result distribution</p></div>
+                    </div>
+                    <div class="chart-container donut-container"><canvas id="resultChart"></canvas></div>
+                    <div class="result-legend">
+                        <span><i class="dot green"></i> Pass <b id="passLegend">—</b></span>
+                        <span><i class="dot red"></i> Fail <b id="failLegend">—</b></span>
+                    </div>
+                </article>
+            </div>
+
+            <article class="panel">
+                <div class="panel-heading"><div><h3>Subject-wise Highest Marks</h3><p>Top scorer in each subject</p></div></div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Subject</th><th>Student Name</th><th>Register No.</th><th>Highest Marks</th></tr></thead>
+                        <tbody id="highestTable"></tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
+
+        <section id="reportPage" class="page hidden">
+            <article class="panel">
+                <h3>Find Student Report</h3>
+                <p class="muted">Enter the student's register number.</p>
+                <form id="searchForm" class="search-form">
+                    <input id="regInput" type="text" placeholder="Register Number" required>
+                    <button type="submit" class="primary-btn">Search Student</button>
+                </form>
+                <div id="studentReport" class="report-area"></div>
+            </article>
+        </section>
+
+        <section id="subjectsPage" class="page hidden">
+            <article class="panel">
+                <div class="panel-heading"><div><h3>Subject Analysis</h3><p>Explore individual subject performance</p></div></div>
+                <label for="subjectSelect">Choose subject</label>
+                <select id="subjectSelect"></select>
+                <div class="subject-metrics" id="subjectMetrics"></div>
+                <div class="chart-container subject-chart"><canvas id="subjectChart"></canvas></div>
+            </article>
+        </section>
+
+        <section id="studentsPage" class="page hidden">
+            <article class="panel">
+                <div class="panel-heading"><div><h3>All Students</h3><p>Search and filter student records</p></div></div>
+                <div class="filters">
+                    <input id="tableSearch" type="text" placeholder="Search student name or register number">
+                    <select id="resultFilter">
+                        <option value="ALL">All Results</option>
+                        <option value="PASS">Pass</option>
+                        <option value="FAIL">Fail</option>
+                    </select>
+                    <button id="downloadBtn" class="primary-btn">Download CSV ↓</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr>
+                            <th>Register No.</th><th>Name</th><th>Total / 600</th>
+                            <th>Average</th><th>Grade</th><th>Result</th>
+                        </tr></thead>
+                        <tbody id="studentsTable"></tbody>
+                    </table>
+                </div>
+                <p id="recordCount" class="muted"></p>
+            </article>
+        </section>
+
+        <footer>Student Performance Analytics <span>•</span> Powered by Python & Excel</footer>
+    </main>
+</div>
+</body>
+</html>
